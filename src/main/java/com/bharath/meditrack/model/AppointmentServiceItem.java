@@ -2,17 +2,22 @@ package com.bharath.meditrack.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "appointment_services")
-public class AppointmentService {
+public class AppointmentServiceItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointment_id")
     @JsonIgnore
     private Appointment appointment;
@@ -22,9 +27,8 @@ public class AppointmentService {
 
     private int quantity;
 
-    // SMELL: money as double.
     @Column(name = "unit_price")
-    private double unitPrice;
+    private BigDecimal unitPrice;
 
-    private double subtotal;
+    private BigDecimal subtotal;
 }

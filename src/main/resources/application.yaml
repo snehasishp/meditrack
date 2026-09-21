@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: meditrack
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/meditrack_db}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: ${SHOW_SQL:true}
+
+server:
+  port: ${SERVER_PORT:8080}

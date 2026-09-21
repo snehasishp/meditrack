@@ -1,13 +1,18 @@
 package com.bharath.meditrack.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "appointments")
 public class Appointment {
@@ -19,28 +24,28 @@ public class Appointment {
     @Column(name = "appointment_no")
     private String appointmentNo;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patient patient;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
-    // SMELL: status is a free-text String, no enum, no validation of transitions.
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private AppointmentStatus status;
 
     @Column(name = "scheduled_date")
     private LocalDate scheduledDate;
 
-    // SMELL: money as double.
     @Column(name = "total_amount")
-    private double totalAmount;
+    private BigDecimal totalAmount;
 
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<AppointmentService> services = new ArrayList<>();
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AppointmentServiceItem> services = new ArrayList<>();
 }

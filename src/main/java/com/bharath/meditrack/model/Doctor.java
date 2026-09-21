@@ -1,10 +1,15 @@
 package com.bharath.meditrack.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "doctors")
 public class Doctor {
@@ -16,17 +21,15 @@ public class Doctor {
     @Column(name = "license_no")
     private String licenseNo;
 
-    // SMELL: money as double instead of BigDecimal.
     @Column(name = "consultation_fee")
-    private double consultationFee;
+    private BigDecimal consultationFee;
 
     @Column(name = "daily_slot_capacity")
     private int dailySlotCapacity;
 
     private boolean active;
 
-    // SMELL: EAGER fetch everywhere.
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "specialty_id")
     private Specialty specialty;
 

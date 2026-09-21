@@ -1,10 +1,15 @@
 package com.bharath.meditrack.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "payments")
 public class Payment {
@@ -12,7 +17,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointment_id")
     private Appointment appointment;
 
@@ -22,8 +27,7 @@ public class Payment {
     @Column(name = "payment_status")
     private String paymentStatus;
 
-    // SMELL: money as double.
-    private double amount;
+    private BigDecimal amount;
 
     private LocalDateTime createdAt;
 }
