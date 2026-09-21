@@ -27,7 +27,7 @@ src/main/java/com/bharath/meditrack/
   exception/      ErrorResponse + custom exceptions + GlobalExceptionHandler
   mapper/         (entity↔DTO mapping inline in service layer)
   MediTrackApplication.java
-src/main/resources/application.properties
+src/main/resources/application.yaml
 db/meditrack_schema.sql   MySQL schema + seed data
 ```
 
