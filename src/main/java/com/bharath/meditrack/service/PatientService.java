@@ -40,7 +40,7 @@ public class PatientService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .phone(request.getPhone())
-                .dateOfBirth(request.getDateOfBirth() != null ? LocalDate.parse(request.getDateOfBirth()) : null)
+                .dateOfBirth(request.getDateOfBirth())
                 .createdAt(LocalDateTime.now())
                 .build();
         return toResponse(patientRepository.save(patient));

@@ -2,6 +2,7 @@ package com.bharath.meditrack.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -22,5 +23,5 @@ public class CreatePatientRequest {
     private String phone;
 
     @Past
-    private String dateOfBirth;
+    private LocalDate dateOfBirth;
 }
