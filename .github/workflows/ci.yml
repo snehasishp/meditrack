@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Test on MySQL
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: meditrack_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        volumes:
+          - ./db/meditrack_schema.sql:/docker-entrypoint-initdb.d/meditrack_schema.sql:ro
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: eclipse-temurin
+          java-version: 21
+          cache: maven
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in $(seq 1 30); do
+            mysqladmin ping -h 127.0.0.1 --silent && exit 0
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+          exit 1
+
+      - name: Run tests
+        run: mvn test -B
+        env:
+          DB_URL: jdbc:mysql://127.0.0.1:3306/meditrack_db
+          DB_USERNAME: root
+          DB_PASSWORD: root
+
+  build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build -t meditrack .
+
+      - name: Log in to Docker Hub
+        if: env.DOCKERHUB_USERNAME != null
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Push Docker image
+        if: env.DOCKERHUB_USERNAME != null
+        run: |
+          docker tag meditrack ${{ secrets.DOCKERHUB_USERNAME }}/meditrack:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/meditrack:latest
