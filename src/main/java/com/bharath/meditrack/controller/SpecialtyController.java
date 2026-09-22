@@ -3,6 +3,7 @@ package com.bharath.meditrack.controller;
 import com.bharath.meditrack.dto.CreateSpecialtyRequest;
 import com.bharath.meditrack.dto.SpecialtyResponse;
 import com.bharath.meditrack.service.SpecialtyService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/specialties")
 @RequiredArgsConstructor
+@Tag(name = "Specialty Management", description = "Manage medical specialties")
 public class SpecialtyController {
 
     private final SpecialtyService specialtyService;

@@ -2,14 +2,13 @@ package com.bharath.meditrack.service;
 
 import com.bharath.meditrack.dto.CreatePatientRequest;
 import com.bharath.meditrack.dto.PatientResponse;
+import com.bharath.meditrack.exception.DuplicateResourceException;
 import com.bharath.meditrack.exception.ResourceNotFoundException;
-import com.bharath.meditrack.exception.ValidationException;
 import com.bharath.meditrack.model.Patient;
 import com.bharath.meditrack.repo.PatientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class PatientService {
 
     public PatientResponse create(CreatePatientRequest request) {
         if (patientRepository.existsByEmail(request.getEmail())) {
-            throw new ValidationException("Patient with email " + request.getEmail() + " already exists");
+            throw new DuplicateResourceException("Patient with email " + request.getEmail() + " already exists");
         }
         Patient patient = Patient.builder()
                 .firstName(request.getFirstName())

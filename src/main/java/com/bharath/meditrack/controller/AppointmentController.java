@@ -3,6 +3,7 @@ package com.bharath.meditrack.controller;
 import com.bharath.meditrack.dto.AppointmentResponse;
 import com.bharath.meditrack.dto.BookAppointmentRequest;
 import com.bharath.meditrack.service.AppointmentService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/appointments")
 @RequiredArgsConstructor
+@Tag(name = "Appointment Management", description = "Book and manage clinic appointments")
 public class AppointmentController {
 
     private final AppointmentService appointmentService;

@@ -2,6 +2,7 @@ package com.bharath.meditrack.service;
 
 import com.bharath.meditrack.dto.CreateSpecialtyRequest;
 import com.bharath.meditrack.dto.SpecialtyResponse;
+import com.bharath.meditrack.exception.DuplicateResourceException;
 import com.bharath.meditrack.model.Specialty;
 import com.bharath.meditrack.repo.SpecialtyRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,9 @@ public class SpecialtyService {
     }
 
     public SpecialtyResponse create(CreateSpecialtyRequest request) {
+        if (specialtyRepository.existsBySlug(request.getSlug())) {
+            throw new DuplicateResourceException("Specialty with slug " + request.getSlug() + " already exists");
+        }
         Specialty specialty = Specialty.builder()
                 .name(request.getName())
                 .slug(request.getSlug())

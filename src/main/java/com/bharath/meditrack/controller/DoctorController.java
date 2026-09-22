@@ -3,6 +3,7 @@ package com.bharath.meditrack.controller;
 import com.bharath.meditrack.dto.CreateDoctorRequest;
 import com.bharath.meditrack.dto.DoctorResponse;
 import com.bharath.meditrack.service.DoctorService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/doctors")
 @RequiredArgsConstructor
+@Tag(name = "Doctor Management", description = "Manage doctors and their profiles")
 public class DoctorController {
 
     private final DoctorService doctorService;

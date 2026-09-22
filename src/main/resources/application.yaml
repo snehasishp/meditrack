@@ -14,3 +14,21 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+
+springdoc:
+  paths-to-match: /api/v1/**
+  groups:
+    enabled: true
+  group-configs:
+    - group: specialty
+      paths-to-match: /api/v1/specialties/**
+      packages-to-scan: com.bharath.meditrack.controller.SpecialtyController
+    - group: doctor
+      paths-to-match: /api/v1/doctors/**
+      packages-to-scan: com.bharath.meditrack.controller.DoctorController
+    - group: patient
+      paths-to-match: /api/v1/patients/**
+      packages-to-scan: com.bharath.meditrack.controller.PatientController
+    - group: appointment
+      paths-to-match: /api/v1/appointments/**
+      packages-to-scan: com.bharath.meditrack.controller.AppointmentController

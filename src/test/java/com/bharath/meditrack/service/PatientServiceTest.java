@@ -2,8 +2,8 @@ package com.bharath.meditrack.service;
 
 import com.bharath.meditrack.dto.CreatePatientRequest;
 import com.bharath.meditrack.dto.PatientResponse;
+import com.bharath.meditrack.exception.DuplicateResourceException;
 import com.bharath.meditrack.exception.ResourceNotFoundException;
-import com.bharath.meditrack.exception.ValidationException;
 import com.bharath.meditrack.model.Patient;
 import com.bharath.meditrack.repo.PatientRepository;
 import org.junit.jupiter.api.Test;
@@ -109,7 +109,7 @@ class PatientServiceTest {
         when(patientRepository.existsByEmail("existing@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> patientService.create(request))
-                .isInstanceOf(ValidationException.class)
+                .isInstanceOf(DuplicateResourceException.class)
                 .hasMessageContaining("already exists");
     }
 }
