@@ -2,7 +2,10 @@ package com.bharath.meditrack.controller;
 
 import com.bharath.meditrack.dto.AppointmentResponse;
 import com.bharath.meditrack.dto.BookAppointmentRequest;
+import com.bharath.meditrack.dto.CreateFeedbackRequest;
+import com.bharath.meditrack.dto.FeedbackResponse;
 import com.bharath.meditrack.exception.BusinessRuleException;
+import com.bharath.meditrack.exception.DuplicateResourceException;
 import com.bharath.meditrack.exception.GlobalExceptionHandler;
 import com.bharath.meditrack.exception.ResourceNotFoundException;
 import com.bharath.meditrack.service.AppointmentService;
@@ -26,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -154,5 +158,57 @@ class AppointmentControllerTest {
                .andExpect(status().isConflict())
                .andExpect(jsonPath("$.status").value(409))
                .andExpect(jsonPath("$.message").value("Appointment cannot be cancelled in status CANCELLED"));
+    }
+
+    @Test
+    void testSubmitFeedbackReturnsCreated() throws Exception {
+        CreateFeedbackRequest request = CreateFeedbackRequest.builder()
+                .rating(5)
+                .comment("Great service!")
+                .build();
+        FeedbackResponse response = FeedbackResponse.builder()
+                .id(1L)
+                .appointmentId(1L)
+                .rating(5)
+                .comment("Great service!")
+                .createdAt(LocalDateTime.now())
+                .build();
+        when(appointmentService.submitFeedback(eq(1L), any(CreateFeedbackRequest.class))).thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/appointments/1/feedback")
+                       .contentType(MediaType.APPLICATION_JSON)
+                       .content(objectMapper.writeValueAsString(request)))
+               .andExpect(status().isCreated())
+               .andExpect(jsonPath("$.id").value(1))
+               .andExpect(jsonPath("$.rating").value(5))
+               .andExpect(jsonPath("$.comment").value("Great service!"));
+    }
+
+    @Test
+    void testSubmitFeedbackOnNonCompletedReturnsConflict() throws Exception {
+        CreateFeedbackRequest request = CreateFeedbackRequest.builder().rating(5).build();
+        when(appointmentService.submitFeedback(eq(1L), any(CreateFeedbackRequest.class)))
+                .thenThrow(new BusinessRuleException("Appointment must be completed to submit feedback"));
+
+        mockMvc.perform(post("/api/v1/appointments/1/feedback")
+                       .contentType(MediaType.APPLICATION_JSON)
+                       .content(objectMapper.writeValueAsString(request)))
+               .andExpect(status().isConflict())
+               .andExpect(jsonPath("$.status").value(409))
+               .andExpect(jsonPath("$.message").value("Appointment must be completed to submit feedback"));
+    }
+
+    @Test
+    void testSubmitFeedbackAlreadyExistsReturnsConflict() throws Exception {
+        CreateFeedbackRequest request = CreateFeedbackRequest.builder().rating(5).build();
+        when(appointmentService.submitFeedback(eq(1L), any(CreateFeedbackRequest.class)))
+                .thenThrow(new DuplicateResourceException("Feedback already submitted for appointment 1"));
+
+        mockMvc.perform(post("/api/v1/appointments/1/feedback")
+                       .contentType(MediaType.APPLICATION_JSON)
+                       .content(objectMapper.writeValueAsString(request)))
+               .andExpect(status().isConflict())
+               .andExpect(jsonPath("$.status").value(409))
+               .andExpect(jsonPath("$.message").value("Feedback already submitted for appointment 1"));
     }
 }

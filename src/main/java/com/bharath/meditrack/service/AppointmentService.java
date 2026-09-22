@@ -2,14 +2,19 @@ package com.bharath.meditrack.service;
 
 import com.bharath.meditrack.dto.AppointmentResponse;
 import com.bharath.meditrack.dto.BookAppointmentRequest;
+import com.bharath.meditrack.dto.CreateFeedbackRequest;
+import com.bharath.meditrack.dto.FeedbackResponse;
 import com.bharath.meditrack.exception.BusinessRuleException;
+import com.bharath.meditrack.exception.DuplicateResourceException;
 import com.bharath.meditrack.exception.ResourceNotFoundException;
 import com.bharath.meditrack.model.Appointment;
 import com.bharath.meditrack.model.AppointmentStatus;
 import com.bharath.meditrack.model.Doctor;
+import com.bharath.meditrack.model.Feedback;
 import com.bharath.meditrack.model.Patient;
 import com.bharath.meditrack.repo.AppointmentRepository;
 import com.bharath.meditrack.repo.DoctorRepository;
+import com.bharath.meditrack.repo.FeedbackRepository;
 import com.bharath.meditrack.repo.PatientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
+    private final FeedbackRepository feedbackRepository;
 
     public List<AppointmentResponse> findAll() {
         return appointmentRepository.findAll().stream()
@@ -74,6 +80,37 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointment.setUpdatedAt(LocalDateTime.now());
         return toResponse(appointmentRepository.save(appointment));
+    }
+
+    public FeedbackResponse submitFeedback(Long appointmentId, CreateFeedbackRequest request) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment with id " + appointmentId + " not found"));
+
+        if (appointment.getStatus() != AppointmentStatus.COMPLETED) {
+            throw new BusinessRuleException("Appointment must be completed to submit feedback");
+        }
+
+        if (feedbackRepository.existsByAppointmentId(appointmentId)) {
+            throw new DuplicateResourceException("Feedback already submitted for appointment " + appointmentId);
+        }
+
+        Feedback feedback = Feedback.builder()
+                .appointment(appointment)
+                .rating(request.getRating())
+                .comment(request.getComment())
+                .createdAt(LocalDateTime.now())
+                .build();
+        return toFeedbackResponse(feedbackRepository.save(feedback));
+    }
+
+    private FeedbackResponse toFeedbackResponse(Feedback feedback) {
+        return FeedbackResponse.builder()
+                .id(feedback.getId())
+                .appointmentId(feedback.getAppointment().getAppointmentId())
+                .rating(feedback.getRating())
+                .comment(feedback.getComment())
+                .createdAt(feedback.getCreatedAt())
+                .build();
     }
 
     private AppointmentResponse toResponse(Appointment appointment) {

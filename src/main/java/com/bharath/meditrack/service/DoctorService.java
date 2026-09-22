@@ -59,6 +59,11 @@ public class DoctorService {
                 .active(doctor.isActive())
                 .specialtyName(doctor.getSpecialty() != null ? doctor.getSpecialty().getName() : null)
                 .createdAt(doctor.getCreatedAt())
+                .averageRating(getAverageRating(doctor.getId()))
                 .build();
+    }
+
+    private Double getAverageRating(Long doctorId) {
+        return doctorRepository.getAverageRatingByDoctorId(doctorId);
     }
 }

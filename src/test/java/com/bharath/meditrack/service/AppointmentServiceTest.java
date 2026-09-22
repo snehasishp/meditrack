@@ -2,11 +2,15 @@ package com.bharath.meditrack.service;
 
 import com.bharath.meditrack.dto.AppointmentResponse;
 import com.bharath.meditrack.dto.BookAppointmentRequest;
+import com.bharath.meditrack.dto.CreateFeedbackRequest;
+import com.bharath.meditrack.dto.FeedbackResponse;
 import com.bharath.meditrack.exception.BusinessRuleException;
+import com.bharath.meditrack.exception.DuplicateResourceException;
 import com.bharath.meditrack.exception.ResourceNotFoundException;
 import com.bharath.meditrack.model.*;
 import com.bharath.meditrack.repo.AppointmentRepository;
 import com.bharath.meditrack.repo.DoctorRepository;
+import com.bharath.meditrack.repo.FeedbackRepository;
 import com.bharath.meditrack.repo.PatientRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +40,9 @@ class AppointmentServiceTest {
 
     @Mock
     private PatientRepository patientRepository;
+
+    @Mock
+    private FeedbackRepository feedbackRepository;
 
     @InjectMocks
     private AppointmentService appointmentService;
@@ -209,5 +216,57 @@ class AppointmentServiceTest {
         assertThatThrownBy(() -> appointmentService.cancel(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Appointment with id 99 not found");
+    }
+
+    @Test
+    void testSubmitFeedbackSuccess() {
+        CreateFeedbackRequest request = CreateFeedbackRequest.builder()
+                .rating(5)
+                .comment("Great doctor!")
+                .build();
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment(AppointmentStatus.COMPLETED)));
+        when(feedbackRepository.existsByAppointmentId(1L)).thenReturn(false);
+        when(feedbackRepository.save(any(Feedback.class))).thenAnswer(inv -> {
+            Feedback f = inv.getArgument(0);
+            f.setId(1L);
+            return f;
+        });
+
+        FeedbackResponse result = appointmentService.submitFeedback(1L, request);
+
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getRating()).isEqualTo(5);
+        assertThat(result.getComment()).isEqualTo("Great doctor!");
+    }
+
+    @Test
+    void testSubmitFeedbackThrowsWhenAppointmentNotFound() {
+        CreateFeedbackRequest request = CreateFeedbackRequest.builder().rating(5).build();
+        when(appointmentRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> appointmentService.submitFeedback(99L, request))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Appointment with id 99 not found");
+    }
+
+    @Test
+    void testSubmitFeedbackThrowsWhenNotCompleted() {
+        CreateFeedbackRequest request = CreateFeedbackRequest.builder().rating(5).build();
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment(AppointmentStatus.REQUESTED)));
+
+        assertThatThrownBy(() -> appointmentService.submitFeedback(1L, request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Appointment must be completed to submit feedback");
+    }
+
+    @Test
+    void testSubmitFeedbackThrowsWhenAlreadySubmitted() {
+        CreateFeedbackRequest request = CreateFeedbackRequest.builder().rating(5).build();
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment(AppointmentStatus.COMPLETED)));
+        when(feedbackRepository.existsByAppointmentId(1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> appointmentService.submitFeedback(1L, request))
+                .isInstanceOf(DuplicateResourceException.class)
+                .hasMessage("Feedback already submitted for appointment 1");
     }
 }

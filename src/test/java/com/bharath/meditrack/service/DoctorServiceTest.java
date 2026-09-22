@@ -51,12 +51,14 @@ class DoctorServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build();
         when(doctorRepository.findAll()).thenReturn(List.of(doctor));
+        when(doctorRepository.getAverageRatingByDoctorId(1L)).thenReturn(null);
 
         List<DoctorResponse> result = doctorService.findAll();
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getName()).isEqualTo("Dr. Asha Rao");
         assertThat(result.get(0).getSpecialtyName()).isEqualTo("Cardiology");
+        assertThat(result.get(0).getAverageRating()).isNull();
     }
 
     @Test
@@ -134,5 +136,26 @@ class DoctorServiceTest {
         assertThatThrownBy(() -> doctorService.create(request))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Specialty with id 99 not found");
+    }
+
+    @Test
+    void testFindByIdReturnsAverageRating() {
+        Specialty specialty = Specialty.builder().id(1L).name("Cardiology").build();
+        Doctor doctor = Doctor.builder()
+                .id(1L)
+                .name("Dr. Asha Rao")
+                .licenseNo("LIC-CARD-001")
+                .consultationFee(new BigDecimal("600.00"))
+                .dailySlotCapacity(8)
+                .active(true)
+                .specialty(specialty)
+                .build();
+        when(doctorRepository.findById(1L)).thenReturn(Optional.of(doctor));
+        when(doctorRepository.getAverageRatingByDoctorId(1L)).thenReturn(4.5);
+
+        DoctorResponse result = doctorService.findById(1L);
+
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getAverageRating()).isEqualTo(4.5);
     }
 }

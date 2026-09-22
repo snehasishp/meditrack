@@ -2,6 +2,8 @@ package com.bharath.meditrack.controller;
 
 import com.bharath.meditrack.dto.AppointmentResponse;
 import com.bharath.meditrack.dto.BookAppointmentRequest;
+import com.bharath.meditrack.dto.CreateFeedbackRequest;
+import com.bharath.meditrack.dto.FeedbackResponse;
 import com.bharath.meditrack.service.AppointmentService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -39,5 +41,13 @@ public class AppointmentController {
     @PostMapping("/{id}/cancel")
     public AppointmentResponse cancel(@PathVariable Long id) {
         return appointmentService.cancel(id);
+    }
+
+    @PostMapping("/{id}/feedback")
+    public ResponseEntity<FeedbackResponse> submitFeedback(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateFeedbackRequest request) {
+        FeedbackResponse response = appointmentService.submitFeedback(id, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

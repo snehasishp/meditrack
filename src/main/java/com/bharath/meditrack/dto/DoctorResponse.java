@@ -17,4 +17,5 @@ public class DoctorResponse {
     private Boolean active;
     private String specialtyName;
     private LocalDateTime createdAt;
+    private Double averageRating;
 }
