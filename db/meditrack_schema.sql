@@ -138,3 +138,7 @@ INSERT INTO patients (first_name, last_name, email, phone, date_of_birth, create
 SELECT * FROM specialties;
 SELECT * FROM doctors;
 SELECT * FROM patients;
+SELECT * FROM appointments;
+SELECT * FROM appointment_services;
+SELECT * FROM payments;
+SELECT * FROM feedbacks;

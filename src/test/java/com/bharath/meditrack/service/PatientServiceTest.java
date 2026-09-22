@@ -45,7 +45,8 @@ class PatientServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(1L);
         assertThat(result.get(0).getFirstName()).isEqualTo("John");
-        assertThat(result.get(0).getEmail()).isEqualTo("john@example.com");
+        assertThat(result.get(0).getEmail()).isEqualTo("j***@example.com");
+        assertThat(result.get(0).getPhone()).isEqualTo("*******7890");
     }
 
     @Test
@@ -96,7 +97,7 @@ class PatientServiceTest {
 
         assertThat(result.getId()).isEqualTo(2L);
         assertThat(result.getFirstName()).isEqualTo("Jane");
-        assertThat(result.getEmail()).isEqualTo("jane@example.com");
+        assertThat(result.getEmail()).isEqualTo("j***@example.com");
     }
 
     @Test

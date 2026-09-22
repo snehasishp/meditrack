@@ -66,7 +66,7 @@ class PatientControllerTest {
                .andExpect(status().isOk())
                .andExpect(jsonPath("$[0].id").value(1))
                .andExpect(jsonPath("$[0].firstName").value("John"))
-               .andExpect(jsonPath("$[0].email").value("john@example.com"));
+               .andExpect(jsonPath("$[0].email").value("j***@example.com"));
     }
 
     @Test
@@ -85,6 +85,6 @@ class PatientControllerTest {
                .andExpect(status().isCreated())
                .andExpect(jsonPath("$.id").value(2))
                .andExpect(jsonPath("$.firstName").value("Jane"))
-               .andExpect(jsonPath("$.email").value("jane@example.com"));
+               .andExpect(jsonPath("$.email").value("j***@example.com"));
     }
 }
